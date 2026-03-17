@@ -32,6 +32,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     /* ---------------------------------------------------------------
+       MOBILE SIDEBAR TOGGLE
+    --------------------------------------------------------------- */
+    const sidebar         = document.getElementById('sidebar');
+    const hamburgerBtn    = document.getElementById('hamburger-btn');
+    const sidebarOverlay  = document.getElementById('sidebar-overlay');
+
+    function openSidebar() {
+        sidebar.classList.add('mobile-open');
+        sidebarOverlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+        sidebar.classList.remove('mobile-open');
+        sidebarOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    hamburgerBtn?.addEventListener('click', () => {
+        if (sidebar.classList.contains('mobile-open')) {
+            closeSidebar();
+        } else {
+            openSidebar();
+        }
+    });
+
+    // Tap overlay → close
+    sidebarOverlay?.addEventListener('click', closeSidebar);
+
+    // Tap any sidebar nav button → close sidebar on mobile
+    sidebar?.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (window.innerWidth < 768) closeSidebar();
+        });
+    });
+
+    /* ---------------------------------------------------------------
        SUGGESTION PILLS — click to fill input
     --------------------------------------------------------------- */
     const messageInput = document.getElementById('message-input');
@@ -47,7 +84,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.querySelectorAll('.feature-card').forEach(card => {
         card.addEventListener('click', () => {
-            messageInput.focus();
+            // Open file explorer to pick an image
+            document.getElementById('image-upload').click();
         });
     });
 

@@ -37,6 +37,9 @@
 
 <body class="bg-slate-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans h-screen overflow-hidden transition-colors duration-300">
 
+    <!-- Mobile Sidebar Overlay (backdrop) -->
+    <div id="sidebar-overlay"></div>
+
 
 
     <div class="flex h-screen w-full overflow-hidden">
@@ -130,10 +133,17 @@
             <header class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl sticky top-0 z-10 transition-colors duration-300">
                 <div class="flex items-center gap-3">
 
+                    <!-- Hamburger Button (mobile only, hidden on desktop via CSS) -->
+                    <button id="hamburger-btn"
+                        class="w-9 h-9 items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        title="Open menu" style="display:none">
+                        <i class="ph ph-list text-xl"></i>
+                    </button>
+
                     <!-- Breadcrumb / Title -->
                     <div class="flex items-center gap-2">
                         <span class="hidden sm:block text-sm font-medium text-gray-500 dark:text-gray-400">Vision AI</span>
-                        <span class="hidden sm:block text-gray-300 dark:text-gray-700">/</span>
+                        <span class="breadcrumb-slash hidden sm:block text-gray-300 dark:text-gray-700">/</span>
                         <span class="text-sm font-semibold text-gray-900 dark:text-white">Image Recognition Chat</span>
                     </div>
                 </div>
@@ -164,63 +174,74 @@
                 <div class="w-full max-w-2xl px-4 flex flex-col gap-5" id="chat-messages-container">
 
                     <!-- Welcome Screen -->
-                    <div id="welcome-screen" class="flex flex-col items-center justify-center text-center py-6 animate-fadeSlideUp">
+                    <div id="welcome-screen" class="flex flex-col items-center justify-center text-center py-4 animate-fadeSlideUp">
+
                         <!-- Animated Icon -->
-                        <div class="relative mb-5">
-                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/25">
-                                <i class="ph-fill ph-aperture text-white text-4xl"></i>
+                        <div class="relative mb-4">
+                            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-xl shadow-indigo-500/25">
+                                <i class="ph-fill ph-aperture text-white text-3xl"></i>
                             </div>
-                            <div class="absolute -bottom-1 -right-1 w-7 h-7 bg-emerald-400 rounded-full border-2 border-white dark:border-gray-950 flex items-center justify-center">
-                                <i class="ph-fill ph-sparkle text-white text-xs"></i>
+                            <div class="absolute -bottom-1 -right-1 w-6 h-6 bg-emerald-400 rounded-full border-2 border-white dark:border-gray-950 flex items-center justify-center">
+                                <i class="ph-fill ph-sparkle text-white" style="font-size:10px"></i>
                             </div>
                         </div>
 
-                        <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight mb-2">What can I help with?</h1>
-                        <p class="text-gray-500 dark:text-gray-400 text-base max-w-sm leading-relaxed mb-8">
-                            Upload an image and ask anything — I'll use AI powered by Python to recognize, extract, and explain what's inside.
+                        <h1 class="text-2xl font-bold text-gray-900 dark:text-white tracking-tight mb-1">What can I help with?</h1>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm max-w-xs leading-relaxed mb-5">
+                            Upload an image and ask anything — AI powered by Python will analyze it instantly.
                         </p>
 
-                        <!-- Feature Cards Grid -->
-                        <div class="grid grid-cols-2 gap-3 w-full mb-8">
-                            <button class="feature-card group text-left p-4 bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.98] transition-all duration-200">
-                                <div class="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 flex items-center justify-center mb-3 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
-                                    <i class="ph-duotone ph-image text-xl text-indigo-600 dark:text-indigo-400"></i>
+                        <!-- Feature Cards Grid — always 2 cols, compact on mobile -->
+                        <div class="feature-grid grid grid-cols-2 gap-2.5 w-full mb-5">
+
+                            <!-- Object Detection -->
+                            <button class="feature-card group text-left bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-indigo-300 dark:hover:border-indigo-500/50 hover:shadow-lg hover:shadow-indigo-500/10 active:scale-[0.97] transition-all duration-200 overflow-hidden">
+                                <div class="card-icon-wrap flex items-center justify-center w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-500/10 group-hover:bg-indigo-100 dark:group-hover:bg-indigo-500/20 transition-colors">
+                                    <i class="ph-fill ph-magnifying-glass text-xl text-indigo-600 dark:text-indigo-400"></i>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Object Detection</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Identify and locate objects in any image.</p>
+                                <p class="card-title font-semibold text-gray-900 dark:text-white text-sm">Object Detection</p>
+                                <p class="card-desc text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Identify &amp; locate objects.</p>
                             </button>
-                            <button class="feature-card group text-left p-4 bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 active:scale-[0.98] transition-all duration-200">
-                                <div class="w-9 h-9 rounded-xl bg-purple-50 dark:bg-purple-500/10 flex items-center justify-center mb-3 group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors">
-                                    <i class="ph-duotone ph-text-t text-xl text-purple-600 dark:text-purple-400"></i>
+
+                            <!-- OCR Text Extraction -->
+                            <button class="feature-card group text-left bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-purple-300 dark:hover:border-purple-500/50 hover:shadow-lg hover:shadow-purple-500/10 active:scale-[0.97] transition-all duration-200 overflow-hidden">
+                                <div class="card-icon-wrap flex items-center justify-center w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-500/10 group-hover:bg-purple-100 dark:group-hover:bg-purple-500/20 transition-colors">
+                                    <i class="ph-fill ph-text-t text-xl text-purple-600 dark:text-purple-400"></i>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white text-sm mb-1">OCR Text Extraction</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Digitize text from documents, receipts & signs.</p>
+                                <p class="card-title font-semibold text-gray-900 dark:text-white text-sm">OCR Extraction</p>
+                                <p class="card-desc text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Digitize text from docs.</p>
                             </button>
-                            <button class="feature-card group text-left p-4 bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-rose-300 dark:hover:border-rose-500/50 hover:shadow-lg hover:shadow-rose-500/10 active:scale-[0.98] transition-all duration-200">
-                                <div class="w-9 h-9 rounded-xl bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center mb-3 group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 transition-colors">
-                                    <i class="ph-duotone ph-face-grinning text-xl text-rose-500 dark:text-rose-400"></i>
+
+                            <!-- Face & Expression -->
+                            <button class="feature-card group text-left bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-rose-300 dark:hover:border-rose-500/50 hover:shadow-lg hover:shadow-rose-500/10 active:scale-[0.97] transition-all duration-200 overflow-hidden">
+                                <div class="card-icon-wrap flex items-center justify-center w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-500/10 group-hover:bg-rose-100 dark:group-hover:bg-rose-500/20 transition-colors">
+                                    <i class="ph-fill ph-smiley text-xl text-rose-500 dark:text-rose-400"></i>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Face & Expression</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Detect faces and read emotion in photos.</p>
+                                <p class="card-title font-semibold text-gray-900 dark:text-white text-sm">Face &amp; Expression</p>
+                                <p class="card-desc text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Detect faces &amp; emotions.</p>
                             </button>
-                            <button class="feature-card group text-left p-4 bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.98] transition-all duration-200">
-                                <div class="w-9 h-9 rounded-xl bg-amber-50 dark:bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20 transition-colors">
-                                    <i class="ph-duotone ph-chart-pie-slice text-xl text-amber-500 dark:text-amber-400"></i>
+
+                            <!-- Image Analysis -->
+                            <button class="feature-card group text-left bg-white dark:bg-gray-800/80 rounded-2xl border border-gray-100 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-500/50 hover:shadow-lg hover:shadow-amber-500/10 active:scale-[0.97] transition-all duration-200 overflow-hidden">
+                                <div class="card-icon-wrap flex items-center justify-center w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-500/10 group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20 transition-colors">
+                                    <i class="ph-fill ph-chart-pie-slice text-xl text-amber-500 dark:text-amber-400"></i>
                                 </div>
-                                <p class="font-semibold text-gray-900 dark:text-white text-sm mb-1">Image Analysis</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Deep analysis of scene, color, and context.</p>
+                                <p class="card-title font-semibold text-gray-900 dark:text-white text-sm">Image Analysis</p>
+                                <p class="card-desc text-xs text-gray-500 dark:text-gray-400 leading-relaxed">Scene, color &amp; context.</p>
                             </button>
+
                         </div>
 
-                        <!-- Suggestion Pills -->
+                        <!-- Suggestion Pills — horizontal scroll on mobile -->
                         <div class="w-full">
-                            <p class="text-xs text-gray-400 dark:text-gray-600 font-semibold uppercase tracking-widest mb-3">Try asking</p>
-                            <div class="flex flex-wrap gap-2 justify-center">
-                                <button class="suggestion-pill px-4 py-2 text-sm rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-95">"What objects are in this image?"</button>
-                                <button class="suggestion-pill px-4 py-2 text-sm rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all active:scale-95">"Extract all text from this receipt"</button>
-                                <button class="suggestion-pill px-4 py-2 text-sm rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-rose-400 hover:text-rose-500 dark:hover:text-rose-400 transition-all active:scale-95">"Describe this scene in detail"</button>
+                            <p class="text-xs text-gray-400 dark:text-gray-600 font-semibold uppercase tracking-widest mb-2.5">Try asking</p>
+                            <div class="pills-scroll flex gap-2 overflow-x-auto pb-1" style="-webkit-overflow-scrolling:touch; scrollbar-width:none;">
+                                <button class="suggestion-pill flex-shrink-0 px-3.5 py-2 text-xs rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-indigo-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-all active:scale-95 whitespace-nowrap">"What objects are in this image?"</button>
+                                <button class="suggestion-pill flex-shrink-0 px-3.5 py-2 text-xs rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-purple-400 hover:text-purple-600 dark:hover:text-purple-400 transition-all active:scale-95 whitespace-nowrap">"Extract all text from this receipt"</button>
+                                <button class="suggestion-pill flex-shrink-0 px-3.5 py-2 text-xs rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-rose-400 hover:text-rose-500 dark:hover:text-rose-400 transition-all active:scale-95 whitespace-nowrap">"Describe this scene in detail"</button>
                             </div>
                         </div>
+
                     </div>
                     <!-- Messages appended here -->
                 </div>
@@ -262,7 +283,7 @@
                             <!-- Textarea -->
                             <textarea id="message-input" rows="1"
                                 class="flex-1 bg-transparent border-none focus:ring-0 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 resize-none py-2 max-h-36 custom-scrollbar text-sm outline-none leading-relaxed"
-                                placeholder="Message Vision AI... (Shift+Enter for new line)"></textarea>
+                                placeholder="Message Vision AI..."></textarea>
 
                             <!-- Send Button -->
                             <button id="send-btn" disabled
@@ -271,9 +292,7 @@
                             </button>
                         </div>
                     </div>
-                    <p class="text-center text-[11px] text-gray-400 dark:text-gray-600 mt-2">
-                        SpringBoot backend + Python AI · Press <kbd class="px-1 py-0.5 bg-gray-100 dark:bg-gray-800 rounded text-[10px] font-medium">Enter</kbd> to send
-                    </p>
+
                 </div>
             </div>
         </main>
