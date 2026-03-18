@@ -1,6 +1,34 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     /* ---------------------------------------------------------------
+       USER PROFILE — hydrate sidebar from localStorage
+    --------------------------------------------------------------- */
+    try {
+        const userData = JSON.parse(localStorage.getItem('visionai_user') || '{}');
+        const name  = userData.name  || 'User';
+        const email = userData.email || '';
+
+        const nameEl     = document.getElementById('user-name');
+        const emailEl    = document.getElementById('user-email');
+        const initialsEl = document.getElementById('user-initials');
+
+        if (nameEl)     nameEl.textContent = name;
+        if (emailEl)    emailEl.textContent = email;
+        if (initialsEl) {
+            // Build initials from first letters of each word (max 2)
+            const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+            initialsEl.textContent = initials || 'U';
+        }
+    } catch (_) {}
+
+    /* ── Logout ── */
+    document.getElementById('logout-btn')?.addEventListener('click', () => {
+        localStorage.removeItem('visionai_token');
+        localStorage.removeItem('visionai_user');
+        window.location.href = 'login.html';
+    });
+
+    /* ---------------------------------------------------------------
        THEME (Dark / Light Mode)
     --------------------------------------------------------------- */
     const htmlEl = document.documentElement;
@@ -125,6 +153,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentImageDataUrl = null;
     let currentImageFile = null;
+    let isProcessing = false;  // 🔒 true while waiting for AI reply
+
+    /* Lock / unlock — ONLY the send button is blocked while processing.
+       The textarea and image upload stay fully enabled so the user can
+       compose their next message while waiting for the current answer. */
+    function setProcessing(processing) {
+        isProcessing = processing;
+        // Only the send button needs updating; toggleSendButton handles it.
+        toggleSendButton();
+        // Re-focus the textarea so the user can start typing immediately
+        if (!processing) messageInput?.focus();
+    }
 
     // Auto-grow textarea
     messageInput?.addEventListener('input', function () {
@@ -133,9 +173,15 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleSendButton();
     });
 
+    // Re-scroll chat when textarea grows (multi-line typing)
+    if (messageInput && typeof ResizeObserver !== 'undefined') {
+        new ResizeObserver(() => scrollToBottom()).observe(messageInput);
+    }
+
     function toggleSendButton() {
         if (sendBtn) {
-            sendBtn.disabled = !messageInput?.value.trim() && !currentImageDataUrl;
+            // Disabled when: processing OR nothing typed AND no image attached
+            sendBtn.disabled = isProcessing || (!messageInput?.value.trim() && !currentImageDataUrl);
         }
     }
 
@@ -181,6 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function sendMessage() {
         const text = messageInput.value.trim();
         if (!text && !currentImageDataUrl) return;
+        if (isProcessing) return; // 🔒 block while waiting for reply
 
         // Collapse welcome screen
         if (welcomeScreen && !welcomeScreen.classList.contains('hidden')) {
@@ -197,7 +244,9 @@ document.addEventListener('DOMContentLoaded', () => {
         currentImageFile = null;
         imagePreviewContainer.classList.add('hidden');
         imageUpload.value = '';
-        toggleSendButton();
+
+        // 🔒 Lock input — no more messages until reply arrives
+        setProcessing(true);
 
         showTypingIndicator();
 
@@ -214,6 +263,7 @@ document.addEventListener('DOMContentLoaded', () => {
            const { reply } = await res.json();
            removeTypingIndicator();
            appendMessage('ai', reply);
+           setProcessing(false);  // ✅ Unlock after real response
            ============================================================ */
 
         setTimeout(() => {
@@ -222,6 +272,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ? `✅ Image received! Once your **SpringBoot** endpoint at \`/api/vision/analyze\` is live, I'll process it with Python's **OpenCV** and **Pillow** libraries and give you full analysis based on: "${text || 'Describe the image'}"`
                 : `Great question! Once your backend is connected, I'll run this through the AI pipeline and respond here in real-time.`;
             appendMessage('ai', aiReply);
+            // ✅ Unlock — user can send next message
+            setProcessing(false);
+            messageInput?.focus();
         }, 1800);
     }
 
@@ -290,6 +343,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function scrollToBottom() {
         const chatWindow = document.getElementById('chat-window');
-        if (chatWindow) chatWindow.scrollTop = chatWindow.scrollHeight;
+        if (!chatWindow) return;
+        // Use rAF so layout is complete before we measure scrollHeight
+        requestAnimationFrame(() => {
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        });
     }
 });

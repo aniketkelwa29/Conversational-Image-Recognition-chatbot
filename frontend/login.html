@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In | Vision AI</title>
+    <meta name="description" content="Sign in to Vision AI — your AI-powered image recognition assistant.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        (function() {
+            var t = localStorage.getItem('visionai_theme');
+            document.documentElement.setAttribute('data-theme', t === 'light' ? 'light' : 'dark');
+        })();
+    </script>
+    <style>
+        /* ── Tokens ── */
+        [data-theme="dark"] {
+            --pg:          #07071a;
+            --card:        #0f0f28;
+            --card2:       #13132e;
+            --border:      rgba(120,100,255,0.18);
+            --border2:     rgba(120,100,255,0.1);
+            --text:        #eeeeff;
+            --text2:       #9090b8;
+            --text3:       #55557a;
+            --in-bg:       rgba(255,255,255,0.04);
+            --in-bd:       rgba(120,100,255,0.22);
+            --in-bd-focus: #7c6fff;
+            --btn-ghost:   rgba(255,255,255,0.06);
+            --btn-ghost-h: rgba(255,255,255,0.1);
+            --err:         #ff6b6b;
+            --err-bg:      rgba(255,80,80,0.08);
+            --shadow:      0 40px 120px rgba(0,0,0,0.8), 0 0 0 1px rgba(120,100,255,0.12);
+            --tog-bg:      rgba(255,255,255,0.06);
+        }
+        [data-theme="light"] {
+            --pg:          #f3f3ff;
+            --card:        #ffffff;
+            --card2:       #f8f8ff;
+            --border:      rgba(110,90,240,0.15);
+            --border2:     rgba(110,90,240,0.08);
+            --text:        #12122a;
+            --text2:       #5a5a80;
+            --text3:       #a0a0c0;
+            --in-bg:       rgba(0,0,0,0.03);
+            --in-bd:       rgba(110,90,240,0.18);
+            --in-bd-focus: #6b5ff8;
+            --btn-ghost:   rgba(0,0,0,0.05);
+            --btn-ghost-h: rgba(0,0,0,0.09);
+            --err:         #e03030;
+            --err-bg:      rgba(230,50,50,0.06);
+            --shadow:      0 40px 120px rgba(100,80,255,0.12), 0 0 0 1px rgba(110,90,240,0.1);
+            --tog-bg:      rgba(0,0,0,0.06);
+        }
+
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--pg);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* ── Animated background ── */
+        .bg-canvas {
+            position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none;
+        }
+        .bg-orb {
+            position: absolute; border-radius: 50%; filter: blur(70px);
+        }
+        .bg-orb-1 { width: 600px; height: 600px; background: radial-gradient(circle, rgba(99,80,235,0.28) 0%, transparent 70%); top: -200px; left: -150px; animation: drift1 18s ease-in-out infinite; }
+        .bg-orb-2 { width: 500px; height: 500px; background: radial-gradient(circle, rgba(139,70,220,0.22) 0%, transparent 70%); bottom: -150px; right: -100px; animation: drift2 22s ease-in-out infinite; }
+        .bg-orb-3 { width: 300px; height: 300px; background: radial-gradient(circle, rgba(60,130,255,0.15) 0%, transparent 70%); top: 40%; right: 20%; animation: drift3 15s ease-in-out infinite; }
+        .bg-grid {
+            position: absolute; inset: 0;
+            background-image: linear-gradient(rgba(120,100,255,0.04) 1px, transparent 1px),
+                              linear-gradient(90deg, rgba(120,100,255,0.04) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+        @keyframes drift1 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(60px,40px) scale(1.05)} 66%{transform:translate(-30px,60px) scale(0.95)} }
+        @keyframes drift2 { 0%,100%{transform:translate(0,0) scale(1)} 33%{transform:translate(-50px,-30px) scale(1.08)} 66%{transform:translate(30px,-50px) scale(0.93)} }
+        @keyframes drift3 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-40px,30px)} }
+
+        /* ── Theme toggle ── */
+        #theme-toggle {
+            position: fixed; top: 18px; right: 18px; z-index: 200;
+            width: 40px; height: 40px;
+            background: var(--tog-bg);
+            border: 1px solid var(--border2);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 17px; color: var(--text2); cursor: pointer;
+            transition: all 0.2s; backdrop-filter: blur(12px);
+        }
+        #theme-toggle:hover { transform: scale(1.08); color: var(--text); background: var(--btn-ghost-h); }
+
+        /* ── Card ── */
+        .card {
+            position: relative; z-index: 10;
+            width: min(440px, calc(100vw - 32px));
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            animation: rise 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes rise { from {opacity:0; transform:translateY(22px) scale(0.98)} to {opacity:1; transform:none} }
+
+        /* Hero image section */
+        .card-hero {
+            position: relative;
+            height: 175px;
+            overflow: hidden;
+        }
+        .card-hero img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center;
+            display: block;
+        }
+        .card-hero::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, var(--card) 100%);
+        }
+
+        /* Brand floating over hero */
+        .card-brand {
+            position: absolute; bottom: 16px; left: 24px; z-index: 2;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .brand-icon {
+            width: 38px; height: 38px; border-radius: 11px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 19px; color: #fff;
+            box-shadow: 0 4px 16px rgba(99,102,241,0.5);
+        }
+        .brand-text { font-size: 1.1rem; font-weight: 800; color: #fff; letter-spacing: -0.02em; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .brand-sub  { font-size: 0.6rem; font-weight: 500; color: rgba(255,255,255,0.65); letter-spacing: 0.12em; text-transform: uppercase; margin-top: 1px; }
+
+        /* Card body */
+        .card-body { padding: 28px 28px 32px; }
+
+        .heading { font-size: 1.55rem; font-weight: 800; color: var(--text); letter-spacing: -0.025em; line-height: 1.2; }
+        .subheading { font-size: 0.85rem; color: var(--text2); margin-top: 5px; }
+
+        /* Fields */
+        .field { margin-top: 18px; }
+        .field-label {
+            font-size: 0.78rem; font-weight: 600; color: var(--text2);
+            margin-bottom: 7px; display: flex; justify-content: space-between; align-items: center;
+        }
+        .forgot { font-size: 0.75rem; font-weight: 600; color: #7c71f8; text-decoration: none; }
+        .forgot:hover { color: #a89cf9; }
+
+        .input-wrap { position: relative; }
+        .input-ico { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); font-size: 16px; color: var(--text3); pointer-events: none; transition: color 0.2s; }
+        .field input {
+            width: 100%;
+            background: var(--in-bg);
+            border: 1.5px solid var(--in-bd);
+            border-radius: 12px;
+            padding: 12px 14px 12px 40px;
+            font-size: 0.875rem; font-family: 'Inter', sans-serif;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+        }
+        .field input::placeholder { color: var(--text3); }
+        .field input:focus { border-color: var(--in-bd-focus); box-shadow: 0 0 0 3px rgba(123,110,248,0.18); background: rgba(123,110,248,0.04); }
+        .field input:focus + .input-ico, .input-wrap:focus-within .input-ico { color: #9087ff; }
+        .pw-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text3); transition: color 0.15s; padding: 3px; }
+        .pw-btn:hover { color: var(--text); }
+
+        /* Check */
+        .check-row { margin-top: 16px; display: flex; align-items: center; gap: 9px; }
+        .check-row input[type="checkbox"] { width: 15px; height: 15px; accent-color: #7c6fff; cursor: pointer; }
+        .check-row label { font-size: 0.8rem; color: var(--text2); cursor: pointer; }
+
+        /* Errors */
+        .ferr { display: none; margin-top: 5px; font-size: 0.72rem; color: var(--err); align-items: center; gap: 4px; }
+        .ferr.on { display: flex; }
+        .banner { display: none; align-items: flex-start; gap: 9px; padding: 11px 14px; border-radius: 11px; font-size: 0.8rem; margin-top: 16px; }
+        .banner.on { display: flex; }
+        .banner.err { background: var(--err-bg); border: 1px solid rgba(255,80,80,0.2); color: var(--err); }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+        .shake { animation: shake 0.35s ease; }
+
+        /* Divider */
+        .divider { display: flex; align-items: center; gap: 12px; margin: 22px 0 18px; }
+        .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border2); }
+        .divider span { font-size: 0.69rem; color: var(--text3); font-weight: 500; white-space: nowrap; }
+
+        /* Primary button */
+        .btn-primary {
+            width: 100%; margin-top: 22px;
+            padding: 13px; border: none; border-radius: 13px; cursor: pointer;
+            font-size: 0.9rem; font-weight: 700; font-family: 'Inter', sans-serif; color: #fff;
+            background: linear-gradient(135deg, #6158f8 0%, #9333ea 100%);
+            box-shadow: 0 6px 22px rgba(102,88,248,0.4);
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: opacity 0.15s, transform 0.15s, box-shadow 0.15s;
+        }
+        .btn-primary:hover:not(:disabled) { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 10px 30px rgba(102,88,248,0.5); }
+        .btn-primary:active:not(:disabled) { transform: scale(0.99); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        @keyframes spin { to{transform:rotate(360deg)} }
+        .spin { display:inline-block; animation: spin 0.7s linear infinite; }
+
+        /* Social */
+        .social-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .btn-social {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            padding: 10px 14px; border-radius: 11px; cursor: pointer;
+            background: var(--btn-ghost); border: 1px solid var(--border2);
+            font-size: 0.8rem; font-weight: 600; font-family: 'Inter', sans-serif; color: var(--text2);
+            transition: background 0.15s, color 0.15s, transform 0.15s;
+        }
+        .btn-social:hover { background: var(--btn-ghost-h); color: var(--text); transform: translateY(-1px); }
+
+        /* Footer link */
+        .card-footer { text-align: center; font-size: 0.8125rem; color: var(--text3); padding: 0 28px 24px; }
+        .card-footer a { color: #8b81fc; font-weight: 700; text-decoration: none; }
+        .card-footer a:hover { color: #b0a8ff; }
+    </style>
+</head>
+<body>
+
+    <!-- Animated background -->
+    <div class="bg-canvas">
+        <div class="bg-grid"></div>
+        <div class="bg-orb bg-orb-1"></div>
+        <div class="bg-orb bg-orb-2"></div>
+        <div class="bg-orb bg-orb-3"></div>
+    </div>
+
+    <!-- Theme toggle -->
+    <button id="theme-toggle" title="Toggle theme">
+        <i id="theme-icon" class="ph ph-sun"></i>
+    </button>
+
+    <!-- Card -->
+    <div class="card">
+
+        <!-- Hero image -->
+        <div class="card-hero">
+            <img src="auth_hero.png" alt="Vision AI illustration">
+            <div class="card-brand">
+                <div class="brand-icon"><i class="ph-fill ph-aperture"></i></div>
+                <div>
+                    <div class="brand-text">Vision AI</div>
+                    <div class="brand-sub">Image Recognition</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Body -->
+        <div class="card-body">
+            <div class="heading">Welcome Back! 👋</div>
+            <div class="subheading">Sign in to continue to your workspace</div>
+
+            <!-- Error -->
+            <div id="err-banner" class="banner err"><i class="ph ph-warning-circle"></i><span id="err-msg">Incorrect email or password.</span></div>
+
+            <!-- Email -->
+            <div class="field">
+                <div class="field-label">Email</div>
+                <div class="input-wrap">
+                    <i class="ph ph-envelope input-ico"></i>
+                    <input type="email" id="email" autocomplete="email" placeholder="you@example.com">
+                </div>
+                <div id="email-err" class="ferr"><i class="ph ph-x-circle"></i><span></span></div>
+            </div>
+
+            <!-- Password -->
+            <div class="field">
+                <div class="field-label">
+                    Password
+                    <a href="#" class="forgot">Forgot password?</a>
+                </div>
+                <div class="input-wrap">
+                    <i class="ph ph-lock input-ico"></i>
+                    <input type="password" id="password" autocomplete="current-password" placeholder="Enter your password" style="padding-right:42px">
+                    <button type="button" class="pw-btn" id="toggle-pw"><i id="pw-eye" class="ph ph-eye"></i></button>
+                </div>
+                <div id="pw-err" class="ferr"><i class="ph ph-x-circle"></i><span></span></div>
+            </div>
+
+            <!-- Remember me -->
+            <div class="check-row">
+                <input type="checkbox" id="remember">
+                <label for="remember">Remember me for 30 days</label>
+            </div>
+
+            <!-- Login button -->
+            <button class="btn-primary" id="login-btn">
+                <span id="btn-lbl">Sign in</span>
+                <i id="btn-arr" class="ph ph-arrow-right"></i>
+                <span id="btn-spin" style="display:none">
+                    <svg class="spin" width="16" height="16" viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="rgba(255,255,255,0.3)" stroke-width="3"/>
+                        <path d="M12 2a10 10 0 0 1 10 10" stroke="white" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </span>
+            </button>
+
+            <!-- Divider -->
+            <div class="divider"><span>or continue with</span></div>
+
+            <!-- Social -->
+            <div class="social-grid">
+                <button class="btn-social">
+                    <svg width="15" height="15" viewBox="0 0 24 24"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                    Google
+                </button>
+                <button class="btn-social">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.342-3.369-1.342-.454-1.155-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+                    GitHub
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="card-footer">
+            Don't have an account? <a href="signup.html">Create one →</a>
+        </div>
+    </div>
+
+    <script>
+        if (localStorage.getItem('visionai_token')) window.location.replace('index.html');
+
+        /* Theme */
+        const root = document.documentElement;
+        const icon = document.getElementById('theme-icon');
+        const syncIcon = () => icon.className = root.getAttribute('data-theme') === 'dark' ? 'ph ph-sun' : 'ph ph-moon';
+        syncIcon();
+        document.getElementById('theme-toggle').onclick = () => {
+            const next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            root.setAttribute('data-theme', next);
+            localStorage.setItem('visionai_theme', next);
+            syncIcon();
+        };
+
+        /* Password toggle */
+        const pwEl = document.getElementById('password');
+        document.getElementById('toggle-pw').onclick = () => {
+            const show = pwEl.type === 'password';
+            pwEl.type = show ? 'text' : 'password';
+            document.getElementById('pw-eye').className = show ? 'ph ph-eye-slash' : 'ph ph-eye';
+        };
+
+        /* Helpers */
+        const showErr = (id, msg) => { const el=document.getElementById(id); el.classList.add('on'); el.querySelector('span').textContent=msg; };
+        const clearErr = id => document.getElementById(id).classList.remove('on');
+        const showBanner = msg => { const b=document.getElementById('err-banner'); document.getElementById('err-msg').textContent=msg; b.classList.add('on','shake'); setTimeout(()=>b.classList.remove('shake'),350); };
+        const hideBanner = () => document.getElementById('err-banner').classList.remove('on');
+
+        document.getElementById('email').oninput = () => clearErr('email-err');
+        pwEl.oninput = () => clearErr('pw-err');
+
+        /* Submit */
+        const btn = document.getElementById('login-btn');
+        const setLoading = on => {
+            btn.disabled = on;
+            document.getElementById('btn-arr').style.display = on ? 'none' : '';
+            document.getElementById('btn-spin').style.display = on ? '' : 'none';
+            document.getElementById('btn-lbl').textContent = on ? 'Signing in…' : 'Sign in';
+        };
+
+        btn.onclick = async () => {
+            hideBanner();
+            const email = document.getElementById('email').value.trim();
+            const pass  = pwEl.value;
+            let ok = true;
+            if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showErr('email-err','Please enter a valid email address.'); ok=false; }
+            if (!pass || pass.length < 6) { showErr('pw-err','Password must be at least 6 characters.'); ok=false; }
+            if (!ok) return;
+            setLoading(true);
+
+            /* ── TODO: replace with real API ──
+            const res  = await fetch('http://localhost:8080/api/auth/login', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({ email, password: pass })
+            });
+            const data = await res.json();
+            if (!res.ok) { showBanner(data.message || 'Login failed.'); setLoading(false); return; }
+            localStorage.setItem('visionai_token', data.token);
+            localStorage.setItem('visionai_user', JSON.stringify({ email, name: data.name }));
+            */
+
+            await new Promise(r => setTimeout(r, 1200));
+            const reg = JSON.parse(localStorage.getItem('visionai_registered') || '{}');
+            if (reg.email === email && reg.password === pass) {
+                localStorage.setItem('visionai_token', 'mock_' + Date.now());
+                localStorage.setItem('visionai_user', JSON.stringify({ email, name: reg.name }));
+            } else if (!localStorage.getItem('visionai_registered')) {
+                localStorage.setItem('visionai_token', 'demo_' + Date.now());
+                localStorage.setItem('visionai_user', JSON.stringify({ email, name: email.split('@')[0] }));
+            } else {
+                setLoading(false); showBanner('Incorrect email or password.'); return;
+            }
+            if (document.getElementById('remember').checked) localStorage.setItem('visionai_remember','1');
+            window.location.href = 'index.html';
+        };
+    </script>
+</body>
+</html>

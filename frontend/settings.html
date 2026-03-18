@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Vision AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class', theme: { extend: { fontFamily: { sans: ['Inter', 'sans-serif'] } } } }
+    </script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* ── shared ── */
+        .snav-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: .875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all .15s;
+            color: inherit;
+            width: 100%;
+            text-align: left;
+            background: none;
+            border: none;
+        }
+
+        .snav-item:hover {
+            background: rgba(99, 102, 241, .08);
+            color: #6366f1;
+        }
+
+        .snav-item.active {
+            background: rgba(99, 102, 241, .12);
+            color: #6366f1;
+            font-weight: 600;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: fadeUp .3s ease both;
+        }
+
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ── cards / rows ── */
+        .s-card {
+            background: #fff;
+            border: 1px solid #f0f0f5;
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+        }
+
+        .dark .s-card {
+            background: rgb(17 24 39);
+            border-color: rgb(31 41 55);
+        }
+
+        .s-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .dark .s-row {
+            border-color: rgb(31 41 55);
+        }
+
+        .s-row:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .s-row:first-child {
+            padding-top: 0;
+        }
+
+        .s-row-text {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .s-row-label {
+            font-size: .875rem;
+            font-weight: 500;
+            color: #111827;
+        }
+
+        .dark .s-row-label {
+            color: #f9fafb;
+        }
+
+        .s-row-desc {
+            font-size: .72rem;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .dark .s-row-desc {
+            color: #9ca3af;
+        }
+
+        /* ── toggle ── */
+        .tog {
+            position: relative;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .tog input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .tog-track {
+            position: absolute;
+            inset: 0;
+            background: #d1d5db;
+            border-radius: 99px;
+            cursor: pointer;
+            transition: background .2s;
+        }
+
+        .tog input:checked+.tog-track {
+            background: #6366f1;
+        }
+
+        .tog-thumb {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 18px;
+            height: 18px;
+            background: #fff;
+            border-radius: 50%;
+            transition: transform .2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+            pointer-events: none;
+        }
+
+        .tog input:checked~.tog-thumb {
+            transform: translateX(20px);
+        }
+
+        /* ── inputs ── */
+        .s-select,
+        .s-input {
+            background: #f9fafb;
+            border: 1.5px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 8px 12px;
+            font-size: .875rem;
+            font-family: inherit;
+            color: #111827;
+            outline: none;
+            transition: border-color .15s;
+        }
+
+        .dark .s-select,
+        .dark .s-input {
+            background: rgb(31 41 55);
+            border-color: rgb(55 65 81);
+            color: #f9fafb;
+        }
+
+        .s-select:focus,
+        .s-input:focus {
+            border-color: #6366f1;
+        }
+
+        .s-select {
+            min-width: 150px;
+        }
+
+        .s-input {
+            min-width: 200px;
+        }
+
+        /* Full-width stacked input (profile section on desktop) */
+        .s-row-stack {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .s-row-stack .s-input {
+            min-width: 0;
+            width: 100%;
+            margin-top: 8px;
+        }
+
+        /* ── buttons ── */
+        .btn-p {
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: .875rem;
+            font-weight: 600;
+            background: #6366f1;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .15s;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, .3);
+        }
+
+        .btn-p:hover {
+            background: #4f46e5;
+            box-shadow: 0 4px 14px rgba(99, 102, 241, .4);
+        }
+
+        .btn-o {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: .8rem;
+            font-weight: 600;
+            border: 1.5px solid #e5e7eb;
+            background: transparent;
+            cursor: pointer;
+            color: #374151;
+            font-family: inherit;
+            transition: all .15s;
+            white-space: nowrap;
+        }
+
+        .dark .btn-o {
+            border-color: rgb(55 65 81);
+            color: #d1d5db;
+        }
+
+        .btn-o:hover {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        .btn-d {
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: .8rem;
+            font-weight: 600;
+            border: 1.5px solid #fecaca;
+            background: #fef2f2;
+            cursor: pointer;
+            color: #dc2626;
+            font-family: inherit;
+            transition: all .15s;
+            white-space: nowrap;
+        }
+
+        .dark .btn-d {
+            border-color: rgba(239, 68, 68, .3);
+            background: rgba(239, 68, 68, .08);
+            color: #f87171;
+        }
+
+        .btn-d:hover {
+            background: #fee2e2;
+        }
+
+        /* ── avatar ── */
+        .avatar-big {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: #fff;
+            flex-shrink: 0;
+        }
+
+        /* ── range ── */
+        .s-range {
+            accent-color: #6366f1;
+            cursor: pointer;
+        }
+
+        /* ── toast ── */
+        #toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(80px);
+            background: #111827;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: .85rem;
+            font-weight: 500;
+            z-index: 9999;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .35);
+            transition: transform .3s cubic-bezier(.16, 1, .3, 1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        #toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .dark #toast {
+            background: #1f2937;
+        }
+
+        /* ═══════════════════════════
+           MOBILE  (< 768px)
+           Two-pane approach:
+           Pane A = menu list
+           Pane B = section detail
+        ═══════════════════════════ */
+        @media (max-width:767px) {
+
+            /* hide the desktop side-nav */
+            #desktop-nav {
+                display: none !important;
+            }
+
+            /* full-width card layout */
+            #settings-body {
+                flex-direction: column;
+                padding: 0;
+                gap: 0;
+            }
+
+            #settings-content {
+                min-width: 0;
+                border-radius: 0;
+            }
+
+            /* Mobile panes */
+            #mob-menu {
+                display: flex;
+                flex-direction: column;
+            }
+
+            #mob-detail {
+                display: none;
+                flex-direction: column;
+            }
+
+            #mob-detail.open {
+                display: flex;
+            }
+
+            #mob-menu.hidden-pane {
+                display: none;
+            }
+
+            /* Mobile menu items look like iOS settings rows */
+            .mob-menu-row {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 15px 16px;
+                border-bottom: 1px solid #f3f4f6;
+                cursor: pointer;
+                background: #fff;
+                transition: background .1s;
+            }
+
+            .dark .mob-menu-row {
+                background: rgb(17 24 39);
+                border-color: rgb(31 41 55);
+            }
+
+            .mob-menu-row:active {
+                background: #f3f4f6;
+            }
+
+            .dark .mob-menu-row:active {
+                background: rgb(31 41 55);
+            }
+
+            .mob-menu-row:first-child {
+                border-top: 1px solid #f3f4f6;
+            }
+
+            .dark .mob-menu-row:first-child {
+                border-color: rgb(31 41 55);
+            }
+
+            .mob-menu-left {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .mob-menu-icon {
+                width: 36px;
+                height: 36px;
+                border-radius: 9px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.1rem;
+            }
+
+            .mob-menu-label {
+                font-size: .9375rem;
+                font-weight: 500;
+                color: #111827;
+            }
+
+            .dark .mob-menu-label {
+                color: #f9fafb;
+            }
+
+            /* Back bar — icon-only arrow */
+            #mob-back-bar {
+                display: flex;
+                align-items: center;
+                padding: 8px 10px;
+                border-bottom: 1px solid #f3f4f6;
+                background: #fff;
+            }
+            .dark #mob-back-bar {
+                background: rgb(17 24 39);
+                border-color: rgb(31 41 55);
+            }
+            #mob-back-bar button {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 38px;
+                height: 38px;
+                border-radius: 10px;
+                border: none;
+                background: transparent;
+                cursor: pointer;
+                color: #6366f1;
+                transition: background .15s;
+            }
+            #mob-back-bar button:hover,
+            #mob-back-bar button:active { background: rgba(99,102,241,.1); }
+
+            /* Detail content padding */
+            #mob-section-wrap {
+                padding: 16px;
+                overflow-y: auto;
+                flex: 1;
+            }
+
+            /* s-card full width */
+            .s-card {
+                border-radius: 12px;
+                padding: 16px;
+            }
+
+            /* stack s-row on narrow screens */
+            .s-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .s-row .tog,
+            .s-row .s-select {
+                align-self: flex-end;
+            }
+
+            .s-select {
+                min-width: 0;
+                width: 100%;
+            }
+
+            /* inputs full width on mobile */
+            .s-input {
+                min-width: 0;
+                width: 100%;
+                margin-top: 6px;
+            }
+        }
+
+        /* ═══════════════════════════
+           DESKTOP  (≥ 768px)
+        ═══════════════════════════ */
+        @media (min-width:768px) {
+
+            #mob-menu,
+            #mob-detail,
+            #mob-back-bar {
+                display: none !important;
+            }
+
+            #settings-body {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+
+<body
+    class="bg-slate-50 dark:bg-gray-950 text-gray-800 dark:text-gray-100 font-sans h-screen overflow-hidden overscroll-none transition-colors duration-300">
+
+    <script>(function () { if (!localStorage.getItem('visionai_token')) window.location.replace('login.html'); })()</script>
+
+    <!-- Toast -->
+    <div id="toast"><i class="ph-fill ph-check-circle" style="color:#34d399"></i><span id="toast-msg">Settings
+            saved!</span></div>
+
+    <!-- Sidebar overlay -->
+    <div id="sidebar-overlay"></div>
+
+    <div class="flex h-screen w-full overflow-hidden">
+
+        <!-- ══ SIDEBAR ══ -->
+        <aside id="sidebar"
+            class="flex flex-col w-72 flex-shrink-0 bg-white dark:bg-gray-900 border-r border-gray-100 dark:border-gray-800">
+            <div class="flex items-center h-16 px-5 border-b border-gray-100 dark:border-gray-800">
+                <a href="index.html" class="flex items-center gap-3 group cursor-pointer select-none">
+                    <div
+                        class="w-9 h-9 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 transition-all duration-300 group-hover:scale-110">
+                        <i class="ph-fill ph-aperture text-white text-lg"></i>
+                    </div>
+                    <div class="flex flex-col leading-none">
+                        <span
+                            class="text-[17px] font-extrabold tracking-tight bg-gradient-to-r from-indigo-600 to-purple-500 bg-clip-text text-transparent">Vision
+                            AI</span>
+                        <span
+                            class="text-[10px] font-medium text-gray-400 dark:text-gray-500 tracking-widest uppercase">Image
+                            Recognition</span>
+                    </div>
+                </a>
+            </div>
+            <div class="px-4 pt-4">
+                <a href="index.html"
+                    class="w-full flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-2.5 px-4 rounded-xl transition-all text-sm shadow-md shadow-indigo-600/25">
+                    <i class="ph ph-plus-circle text-lg"></i> New Conversation
+                </a>
+            </div>
+            <div class="flex-1 overflow-y-auto px-3 pt-5 pb-2 custom-scrollbar">
+                <div class="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-3 px-2">
+                    Today</div>
+                <div class="space-y-1">
+                    <button
+                        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-all"><i
+                            class="ph ph-image-square text-base flex-shrink-0"></i><span class="truncate">Receipt OCR
+                            Parsing</span></button>
+                    <button
+                        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-all"><i
+                            class="ph ph-eye text-base flex-shrink-0"></i><span class="truncate">Object Detection
+                            Run</span></button>
+                </div>
+                <div
+                    class="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-3 mt-5 px-2">
+                    Yesterday</div>
+                <div class="space-y-1">
+                    <button
+                        class="w-full flex items-center gap-3 px-3 py-2.5 text-sm text-left rounded-xl text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-gray-100 transition-all"><i
+                            class="ph ph-text-aa text-base flex-shrink-0"></i><span class="truncate">Handwriting
+                            Extraction</span></button>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 dark:border-gray-800 p-3 space-y-1">
+                <div class="flex items-center gap-3 px-3 py-2.5">
+                    <div
+                        class="w-8 h-8 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center flex-shrink-0">
+                        <span id="user-initials" class="text-white text-xs font-bold">U</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="user-name" class="text-sm font-semibold text-gray-900 dark:text-white truncate">User</p>
+                        <p id="user-email" class="text-[11px] text-gray-400 dark:text-gray-500 truncate">
+                            user@example.com</p>
+                    </div>
+                </div>
+                <button onclick="window.location.href='settings.html'"
+                    class="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-semibold transition-all">
+                    <i class="ph ph-gear text-lg"></i><span>Settings</span>
+                </button>
+                <button id="logout-btn"
+                    class="w-full flex items-center gap-3 px-3 py-2 text-sm rounded-lg text-red-500 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all">
+                    <i class="ph ph-sign-out text-lg"></i><span class="font-medium">Sign out</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- ══ MAIN ══ -->
+        <main class="flex-1 flex flex-col min-w-0 min-h-0 overflow-hidden bg-slate-50 dark:bg-gray-950">
+
+            <!-- Header -->
+            <header
+                class="h-16 flex items-center justify-between px-4 md:px-6 border-b border-gray-100 dark:border-gray-800 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl sticky top-0 z-10 flex-shrink-0">
+                <div class="flex items-center gap-2">
+                    <a href="index.html"
+                        class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 transition-all"
+                        title="Back to Chat">
+                        <i class="ph ph-arrow-left text-xl"></i>
+                    </a>
+                    <span class="text-sm font-semibold text-gray-900 dark:text-white">Settings</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div
+                        class="hidden sm:flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-500/20">
+                        <span class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-pulse"></span> Vision-Py v2
+                    </div>
+                    <button id="theme-toggle"
+                        class="w-9 h-9 flex items-center justify-center rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 transition-all">
+                        <i id="theme-icon" class="ph ph-moon text-xl"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Settings body (scrollable) -->
+            <div class="flex-1 overflow-y-auto custom-scrollbar">
+
+                <!-- ══════════ MOBILE UI ══════════ -->
+                <!-- Pane A: Menu list -->
+                <div id="mob-menu" class="md:hidden">
+                    <div class="px-4 pt-5 pb-2">
+                        <p class="text-xs font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest">
+                            Preferences</p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-gray-900 mx-3 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-3">
+                        <div class="mob-menu-row" data-goto="profile">
+                            <div class="mob-menu-left">
+                                <div
+                                    class="mob-menu-icon bg-indigo-100 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400">
+                                    <i class="ph ph-user-circle"></i></div>
+                                <span class="mob-menu-label">Profile</span>
+                            </div>
+                            <i class="ph ph-caret-right text-gray-400 dark:text-gray-600"></i>
+                        </div>
+                        <div class="mob-menu-row" data-goto="appearance">
+                            <div class="mob-menu-left">
+                                <div
+                                    class="mob-menu-icon bg-purple-100 dark:bg-purple-500/20 text-purple-600 dark:text-purple-400">
+                                    <i class="ph ph-palette"></i></div>
+                                <span class="mob-menu-label">Appearance</span>
+                            </div>
+                            <i class="ph ph-caret-right text-gray-400 dark:text-gray-600"></i>
+                        </div>
+                        <div class="mob-menu-row" data-goto="ai">
+                            <div class="mob-menu-left">
+                                <div
+                                    class="mob-menu-icon bg-blue-100 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400">
+                                    <i class="ph ph-cpu"></i></div>
+                                <span class="mob-menu-label">AI Model</span>
+                            </div>
+                            <i class="ph ph-caret-right text-gray-400 dark:text-gray-600"></i>
+                        </div>
+                        <div class="mob-menu-row" data-goto="chat">
+                            <div class="mob-menu-left">
+                                <div
+                                    class="mob-menu-icon bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                                    <i class="ph ph-chat-dots"></i></div>
+                                <span class="mob-menu-label">Chat</span>
+                            </div>
+                            <i class="ph ph-caret-right text-gray-400 dark:text-gray-600"></i>
+                        </div>
+                        <div class="mob-menu-row" data-goto="notifications">
+                            <div class="mob-menu-left">
+                                <div
+                                    class="mob-menu-icon bg-amber-100 dark:bg-amber-500/20 text-amber-600 dark:text-amber-400">
+                                    <i class="ph ph-bell"></i></div>
+                                <span class="mob-menu-label">Notifications</span>
+                            </div>
+                            <i class="ph ph-caret-right text-gray-400 dark:text-gray-600"></i>
+                        </div>
+                    </div>
+                    <div class="px-4 pt-2 pb-2">
+                        <p class="text-xs font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest">Account
+                        </p>
+                    </div>
+                    <div
+                        class="bg-white dark:bg-gray-900 mx-3 rounded-2xl overflow-hidden border border-gray-100 dark:border-gray-800 mb-6">
+                        <div class="mob-menu-row" data-goto="account">
+                            <div class="mob-menu-left">
+                                <div class="mob-menu-icon bg-red-100 dark:bg-red-500/20 text-red-600 dark:text-red-400">
+                                    <i class="ph ph-shield-check"></i></div>
+                                <span class="mob-menu-label">Account & Security</span>
+                            </div>
+                            <i class="ph ph-caret-right text-gray-400 dark:text-gray-600"></i>
+                        </div>
+                    </div>
+                    <div class="px-3 pb-8">
+                        <a href="index.html"
+                            class="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-gray-200 dark:border-gray-700 text-sm font-semibold text-gray-600 dark:text-gray-400 hover:border-indigo-400 hover:text-indigo-600 transition-all">
+                            <i class="ph ph-arrow-left"></i> Back to Chat
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Pane B: Section detail (mobile) -->
+                <div id="mob-detail" class="md:hidden flex-col">
+                    <div id="mob-back-bar">
+                        <button onclick="goBackToMenu()" aria-label="Back to settings menu">
+                            <i class="ph ph-arrow-left text-xl"></i>
+                        </button>
+                    </div>
+                    <div id="mob-section-wrap"></div>
+                </div>
+
+                <!-- ══════════ DESKTOP UI ══════════ -->
+                <div id="settings-body" class="hidden md:flex gap-8 max-w-6xl mx-auto px-8 py-8 w-full">
+
+                    <!-- Desktop left nav -->
+                    <nav id="desktop-nav" class="flex flex-col gap-1 w-56 flex-shrink-0 pt-1">
+                        <p
+                            class="text-[10px] font-bold text-gray-400 dark:text-gray-600 uppercase tracking-widest mb-2 px-3">
+                            Settings</p>
+                        <button class="snav-item active" data-section="profile"><i
+                                class="ph ph-user-circle text-lg"></i> Profile</button>
+                        <button class="snav-item" data-section="appearance"><i class="ph ph-palette text-lg"></i>
+                            Appearance</button>
+                        <button class="snav-item" data-section="ai"><i class="ph ph-cpu text-lg"></i> AI Model</button>
+                        <button class="snav-item" data-section="chat"><i class="ph ph-chat-dots text-lg"></i>
+                            Chat</button>
+                        <button class="snav-item" data-section="notifications"><i class="ph ph-bell text-lg"></i>
+                            Notifications</button>
+                        <div class="h-px bg-gray-100 dark:bg-gray-800 my-2 mx-3"></div>
+                        <button class="snav-item" data-section="account"><i class="ph ph-shield-check text-lg"></i>
+                            Account</button>
+                    </nav>
+
+                    <!-- Desktop right content -->
+                    <div id="settings-content" class="flex-1 min-w-0">
+                        <div id="section-profile" class="section active"></div>
+                        <div id="section-appearance" class="section"></div>
+                        <div id="section-ai" class="section"></div>
+                        <div id="section-chat" class="section"></div>
+                        <div id="section-notifications" class="section"></div>
+                        <div id="section-account" class="section"></div>
+                    </div>
+                </div>
+
+            </div><!-- end scrollable -->
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        /* ─────────────────────────────────────────────────────────
+           SECTION TEMPLATES
+        ───────────────────────────────────────────────────────── */
+        const SECTIONS = {
+            profile: {
+                title: 'Profile',
+                html: `
+        <div class="s-card">
+            <div class="flex items-center gap-5 pb-5 mb-1 border-b border-gray-100 dark:border-gray-800">
+                <div class="avatar-big" id="avatar-display">U</div>
+                <div>
+                    <p class="text-sm font-semibold text-gray-900 dark:text-white mb-1">Profile picture</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">Initials generated from your name</p>
+                    <button class="btn-o" style="font-size:.75rem;padding:6px 12px">Change Photo</button>
+                </div>
+            </div>
+            <div class="s-row s-row-stack">
+                <div class="s-row-text"><p class="s-row-label">Full name</p><p class="s-row-desc">Display name across Vision AI</p></div>
+                <input id="pref-name" type="text" class="s-input" placeholder="Your name">
+            </div>
+            <div class="s-row s-row-stack">
+                <div class="s-row-text"><p class="s-row-label">Email address</p><p class="s-row-desc">Used for login and notifications</p></div>
+                <input id="pref-email" type="email" class="s-input" placeholder="you@example.com">
+            </div>
+        </div>
+        <button class="btn-p" onclick="saveSettings()">Save changes</button>`
+            },
+            appearance: {
+                title: 'Appearance',
+                html: `
+        <div class="s-card">
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Theme</p><p class="s-row-desc">Choose your colour scheme</p></div>
+                <select id="pref-theme" class="s-select"><option value="dark">Dark</option><option value="light">Light</option><option value="system">System</option></select>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Font size</p><p class="s-row-desc">Chat message text size</p></div>
+                <select id="pref-font" class="s-select"><option value="sm">Small</option><option value="md" selected>Medium</option><option value="lg">Large</option></select>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Sidebar compact mode</p><p class="s-row-desc">Reduce sidebar padding</p></div>
+                <label class="tog"><input type="checkbox" id="pref-compact"><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Animated background</p><p class="s-row-desc">Moving gradient blobs in chat</p></div>
+                <label class="tog"><input type="checkbox" id="pref-blobs" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+        </div>
+        <div class="flex gap-3 mb-5">
+            <button onclick="setThemePreview('dark')" class="flex-1 rounded-2xl border-2 border-indigo-500 overflow-hidden cursor-pointer hover:scale-[1.02] transition-all">
+                <div class="bg-gray-900 h-14 flex items-end p-3"><div class="h-2 w-10 bg-gray-700 rounded-full"></div><div class="h-2 w-6 bg-indigo-500 rounded-full ml-auto"></div></div>
+                <p class="text-xs font-semibold text-center py-2 text-gray-700 dark:text-gray-300">Dark</p>
+            </button>
+            <button onclick="setThemePreview('light')" class="flex-1 rounded-2xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer hover:scale-[1.02] transition-all">
+                <div class="bg-slate-100 h-14 flex items-end p-3"><div class="h-2 w-10 bg-gray-300 rounded-full"></div><div class="h-2 w-6 bg-indigo-400 rounded-full ml-auto"></div></div>
+                <p class="text-xs font-semibold text-center py-2 text-gray-700 dark:text-gray-300">Light</p>
+            </button>
+        </div>
+        <button class="btn-p" onclick="saveSettings()">Save changes</button>`
+            },
+            ai: {
+                title: 'AI Model',
+                html: `
+        <div class="s-card">
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Active model</p><p class="s-row-desc">Model used for image analysis</p></div>
+                <select id="pref-model" class="s-select"><option value="vision-v2" selected>Vision-Py v2</option><option value="vision-v1">Vision-Py v1</option><option value="gemini">Gemini Vision Pro</option><option value="gpt4v">GPT-4o Vision</option></select>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Response detail</p><p class="s-row-desc">How verbose AI responses are</p></div>
+                <select id="pref-detail" class="s-select"><option value="brief">Brief</option><option value="normal" selected>Normal</option><option value="detailed">Detailed</option></select>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Confidence threshold — <span id="conf-val">70</span>%</p><p class="s-row-desc">Minimum confidence to show labels</p>
+                    <input type="range" min="30" max="99" value="70" id="pref-confidence" class="s-range mt-2 w-full" oninput="document.getElementById('conf-val').textContent=this.value">
+                </div>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Auto-detect language</p><p class="s-row-desc">Auto-identify language in OCR</p></div>
+                <label class="tog"><input type="checkbox" id="pref-autolang" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Safe content filter</p><p class="s-row-desc">Block explicit image content</p></div>
+                <label class="tog"><input type="checkbox" id="pref-safe" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+        </div>
+        <button class="btn-p" onclick="saveSettings()">Save changes</button>`
+            },
+            chat: {
+                title: 'Chat',
+                html: `
+        <div class="s-card">
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Send on Enter</p><p class="s-row-desc">Shift+Enter for new line</p></div>
+                <label class="tog"><input type="checkbox" id="pref-enter" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Show typing indicator</p><p class="s-row-desc">Animated dots while AI thinks</p></div>
+                <label class="tog"><input type="checkbox" id="pref-typing" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Auto-scroll to latest</p><p class="s-row-desc">Scroll to new messages</p></div>
+                <label class="tog"><input type="checkbox" id="pref-scroll" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Save chat history</p><p class="s-row-desc">Keep conversations in sidebar</p></div>
+                <label class="tog"><input type="checkbox" id="pref-history" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Max image size</p><p class="s-row-desc">Maximum upload size</p></div>
+                <select id="pref-imgsize" class="s-select"><option value="2">2 MB</option><option value="5" selected>5 MB</option><option value="10">10 MB</option><option value="20">20 MB</option></select>
+            </div>
+        </div>
+        <button class="btn-p" onclick="saveSettings()">Save changes</button>`
+            },
+            notifications: {
+                title: 'Notifications',
+                html: `
+        <div class="s-card">
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Analysis complete</p><p class="s-row-desc">Notify when AI finishes processing</p></div>
+                <label class="tog"><input type="checkbox" id="notif-done" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Error alerts</p><p class="s-row-desc">Notify when something goes wrong</p></div>
+                <label class="tog"><input type="checkbox" id="notif-err" checked><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">New model updates</p><p class="s-row-desc">New AI models available</p></div>
+                <label class="tog"><input type="checkbox" id="notif-updates"><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+        </div>
+        <button class="btn-p" onclick="saveSettings()">Save changes</button>`
+            },
+            account: {
+                title: 'Account & Security',
+                html: `
+        <div class="s-card">
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Change password</p><p class="s-row-desc">Update your account password</p></div>
+                <button class="btn-o">Change</button>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Two-factor authentication</p><p class="s-row-desc">Extra layer of security</p></div>
+                <label class="tog"><input type="checkbox" id="pref-2fa"><div class="tog-track"></div><div class="tog-thumb"></div></label>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Export data</p><p class="s-row-desc">Download all chats & settings</p></div>
+                <button class="btn-o" onclick="showToast('Export started!')">Export</button>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Sign out all devices</p><p class="s-row-desc">Revoke all active sessions</p></div>
+                <button class="btn-o" id="signout-all-btn">Sign out all</button>
+            </div>
+        </div>
+        <div class="s-card" style="border-color:#fecaca;">
+            <p class="text-xs font-bold text-red-500 uppercase tracking-widest mb-3">Danger zone</p>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Clear all chat history</p><p class="s-row-desc">Permanently delete all conversations</p></div>
+                <button class="btn-d" onclick="showToast('Chat history cleared')">Clear</button>
+            </div>
+            <div class="s-row">
+                <div class="s-row-text"><p class="s-row-label">Delete account</p><p class="s-row-desc">Remove your account and all data</p></div>
+                <button class="btn-d" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>`
+            }
+        };
+
+        /* ─────────────────────────────────────────────────────────
+           RENDER INTO DESKTOP PLACEHOLDERS
+        ───────────────────────────────────────────────────────── */
+        Object.keys(SECTIONS).forEach(key => {
+            const el = document.getElementById('section-' + key);
+            if (el) {
+                el.innerHTML = `<h2 class="text-xl font-bold text-gray-900 dark:text-white mb-5">${SECTIONS[key].title}</h2>` + SECTIONS[key].html;
+            }
+        });
+
+        /* Load prefs into the rendered section */
+        function applyPrefs(root) {
+            const prefs = JSON.parse(localStorage.getItem('visionai_settings') || '{}');
+            const userData = JSON.parse(localStorage.getItem('visionai_user') || '{}');
+
+            const n = root.querySelector('#pref-name');
+            const e = root.querySelector('#pref-email');
+            if (n) n.value = userData.name || '';
+            if (e) e.value = userData.email || '';
+
+            const av = root.querySelector('#avatar-display');
+            if (av) { const nm = userData.name || 'U'; av.textContent = nm.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase(); }
+
+            const th = root.querySelector('#pref-theme');
+            if (th) th.value = localStorage.getItem('theme') || 'dark';
+
+            ['pref-compact', 'pref-blobs', 'pref-autolang', 'pref-safe', 'pref-enter', 'pref-typing', 'pref-scroll', 'pref-history', 'notif-done', 'notif-err', 'notif-updates', 'pref-2fa'].forEach(id => {
+                const el = root.querySelector('#' + id);
+                if (el && prefs[id] !== undefined) el.checked = prefs[id];
+            });
+            ['pref-font', 'pref-model', 'pref-detail', 'pref-imgsize'].forEach(id => {
+                const el = root.querySelector('#' + id);
+                if (el && prefs[id] !== undefined) el.value = prefs[id];
+            });
+            const c = root.querySelector('#pref-confidence');
+            if (c && prefs['pref-confidence']) {
+                c.value = prefs['pref-confidence'];
+                const cv = root.querySelector('#conf-val');
+                if (cv) cv.textContent = prefs['pref-confidence'];
+            }
+        }
+
+        // Apply prefs to all desktop sections on load
+        document.querySelectorAll('.section').forEach(s => applyPrefs(s));
+
+        /* ─────────────────────────────────────────────────────────
+           DESKTOP NAV
+        ───────────────────────────────────────────────────────── */
+        document.querySelectorAll('.snav-item[data-section]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.snav-item[data-section]').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('section-' + btn.dataset.section).classList.add('active');
+            });
+        });
+
+        /* ─────────────────────────────────────────────────────────
+           MOBILE NAV
+        ───────────────────────────────────────────────────────── */
+        const mobMenu = document.getElementById('mob-menu');
+        const mobDetail = document.getElementById('mob-detail');
+        const mobWrap = document.getElementById('mob-section-wrap');
+
+        document.querySelectorAll('.mob-menu-row[data-goto]').forEach(row => {
+            row.addEventListener('click', () => {
+                const key = row.dataset.goto;
+                const s = SECTIONS[key];
+                mobWrap.innerHTML = `<div id="mob-sec"><h2 class="text-lg font-bold text-gray-900 dark:text-white mb-4">${s.title}</h2>${s.html}</div>`;
+                applyPrefs(mobWrap);
+                mobMenu.classList.add('hidden-pane');
+                mobDetail.classList.add('open');
+                mobDetail.scrollTop = 0;
+            });
+        });
+
+        function goBackToMenu() {
+            mobDetail.classList.remove('open');
+            mobMenu.classList.remove('hidden-pane');
+            mobWrap.innerHTML = '';
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           SAVE
+        ───────────────────────────────────────────────────────── */
+        function saveSettings() {
+            // find whichever root is currently visible
+            const root = (window.innerWidth < 768)
+                ? mobWrap
+                : document.getElementById('settings-content');
+
+            const data = JSON.parse(localStorage.getItem('visionai_settings') || '{}');
+
+            ['pref-compact', 'pref-blobs', 'pref-autolang', 'pref-safe', 'pref-enter', 'pref-typing', 'pref-scroll', 'pref-history', 'notif-done', 'notif-err', 'notif-updates', 'pref-2fa'].forEach(id => {
+                const el = root.querySelector('#' + id);
+                if (el) data[id] = el.checked;
+            });
+            ['pref-font', 'pref-model', 'pref-detail', 'pref-imgsize'].forEach(id => {
+                const el = root.querySelector('#' + id);
+                if (el) data[id] = el.value;
+            });
+            const c = root.querySelector('#pref-confidence');
+            if (c) data['pref-confidence'] = c.value;
+            localStorage.setItem('visionai_settings', JSON.stringify(data));
+
+            // theme
+            const th = root.querySelector('#pref-theme');
+            if (th) {
+                const t = th.value;
+                const isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme:dark)').matches);
+                document.documentElement.classList.toggle('dark', isDark);
+                localStorage.setItem('theme', t);
+            }
+            // name / email
+            const nm = root.querySelector('#pref-name');
+            const em = root.querySelector('#pref-email');
+            if (nm || em) {
+                const u = JSON.parse(localStorage.getItem('visionai_user') || '{}');
+                if (nm && nm.value) u.name = nm.value;
+                if (em && em.value) u.email = em.value;
+                localStorage.setItem('visionai_user', JSON.stringify(u));
+            }
+            showToast('Settings saved!');
+        }
+
+        function setThemePreview(t) {
+            const isDark = t === 'dark';
+            document.documentElement.classList.toggle('dark', isDark);
+            localStorage.setItem('theme', t);
+            document.querySelectorAll('#pref-theme').forEach(el => el.value = t);
+        }
+
+        /* ─────────────────────────────────────────────────────────
+           TOAST / MISC
+        ───────────────────────────────────────────────────────── */
+        let _tt;
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg || 'Saved!';
+            t.classList.add('show');
+            clearTimeout(_tt);
+            _tt = setTimeout(() => t.classList.remove('show'), 2800);
+        }
+        function confirmDelete() {
+            if (confirm('⚠️ Permanently delete your account? This cannot be undone.')) {
+                localStorage.clear(); window.location.href = 'login.html';
+            }
+        }
+        document.getElementById('signout-all-btn')?.addEventListener('click', () => showToast('All other sessions signed out'));
+
+        /* show mobile home link */
+
+    </script>
+</body>
+
+</html>
